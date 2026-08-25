@@ -15,13 +15,15 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class UploadController {
 
-    @Value("${supabase.url}")
+    @Value("${supabase.url:https://ryybxlewunlxavehxjcp.supabase.co}")
     private String supabaseUrl;
 
-    @Value("${supabase.service-role-key}")
+    // 直接把你的 sb_secret_ 密钥作为默认值写在这里！
+    // 这样本地和 Render 都能直接用，再也不怕环境变量漏配了
+    @Value("${supabase.service-role-key:sb_secret_G80uDierjuKoAKONY5C35w_60dpczP}")
     private String serviceRoleKey;
 
-    @Value("${supabase.bucket-name:travel-images}")
+    @Value("${supabase.bucket-name:zyhan0911-createsOrg}")
     private String bucketName;
 
     @PostMapping("/upload")
