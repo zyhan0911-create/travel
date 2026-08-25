@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球城市旅游地图</title>
+    <!-- 引入高德地图 JS API v2.0 -->
+    <script type="text/javascript">
+        window._AMapSecurityConfig = {
+            securityJsCode: '5d29698351e54fb8a4b1cda25d7fad18',
+        };
+    </script>
+    <script src="https://webapi.amap.com/maps?v=2.0&key=2921914fc3b15f8c45acd4ed8d9ae041&plugin=AMap.PlaceSearch"></script>
+
+    <style>
+        /* 引入优雅的艺术风衬线字体与细腻质感 */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", "Georgia", serif;
+            /* 模拟高级青绿大理石的底色和微光 */
+            background: linear-gradient(135deg, #e0ece4 0%, #c4dbd0 50%, #a3c9b8 100%);
+            color: #2b3a32;
+        }
+
+        /* 左侧面板：带有高级大理石/翡翠半透明质感的侧边栏 */
+        #sidebar {
+            width: 410px;
+            padding: 26px;
+            box-sizing: border-box;
+            /* 半透明雾面青绿质感 */
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            overflow-y: auto;
+            box-shadow: 8px 0 32px rgba(43, 58, 50, 0.08);
+            z-index: 10;
+            border-right: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        #map {
+            flex-grow: 1;
+            height: 100%;
+        }
+
+        /* 艺术感标题 */
+        h2 {
+            font-size: 21px;
+            font-weight: 500;
+            color: #1b3022;
+            margin-top: 0;
+            margin-bottom: 22px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(43, 58, 50, 0.1);
+            padding-bottom: 10px;
+        }
+        h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #3d5a48;
+            margin: 20px 0 10px 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* 表单控件：克制而优雅的流线设计 */
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 12px; color: #4f6f5c; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            box-sizing: border-box;
+            border: 1px solid #b8d0c2;
+            border-radius: 20px; /* 圆润的微胶囊造型，呼应圆圈艺术感 */
+            font-size: 13px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.7);
+            color: #2b3a32;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #528b70;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(82, 139, 112, 0.15);
+        }
+
+        /* 按钮：翡翠深绿色调，温润的圆角胶囊 */
+        button {
+            background: linear-gradient(135deg, #528b70 0%, #3e6b54 100%);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(62, 107, 84, 0.2);
+        }
+        button:hover {
+            background: linear-gradient(135deg, #5f9e80 0%, #4a7d63 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(62, 107, 84, 0.3);
+        }
+
+        /* 搜索栏组合 */
+        .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
+        .search-box input { flex-grow: 1; margin: 0; }
+
+        /* 路线规划面板：通透的水绿色雾化感 */
+        #route-panel {
+            background: rgba(212, 233, 221, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 14px;
+            margin-bottom: 20px;
+            border-radius: 16px;
+            font-size: 13px;
+            border: 1px solid rgba(163, 201, 184, 0.6);
+        }
+
+        /* 滚动条瘦身美化 */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #b8d0c2; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #95b8a4; }
+
+        /* 默认或大屏：左右分栏 */
+        body {
+            margin: 0; padding: 0; display: flex; height: 100vh;
+            font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        #sidebar { width: 410px; height: 100%; overflow-y: auto; z-index: 10; }
+        #map { flex-grow: 1; height: 100%; }
+
+        /* 📱 手机等小屏幕设备自适应：上下堆叠 */
+        @media screen and (max-width: 768px) {
+            body {
+                flex-direction: column; /* 改为上下排列 */
+            }
+            #sidebar {
+                width: 100%;
+                height: 45vh; /* 手机上侧边栏占上半部分 */
+                order: 2;   /* 放在地图下面，或者设为 1 放在上面 */
+            }
+            #map {
+                width: 100%;
+                height: 55vh; /* 地图占下半部分 */
+                order: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 左侧：表单与搜索 -->
+<div id="sidebar">
+    <h2>🗺️ 全球旅游地图</h2>
+
+    <!-- 🆕 路线规划与测距结果面板 -->
+    <div id="route-panel" style="background: #e2f0cb; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 13px; display: none; border: 1px solid #b5d56d;">
+        <b>🧭 路线规划与测距：</b>
+        <div id="route-result-text" style="margin-top: 5px; color: #333;"></div>
+        <div id="transfer-container" style="margin-top: 8px; max-height: 180px; overflow-y: auto;"></div>
+        <button onclick="clearRoute()" style="margin-top: 8px; background: #6c757d; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;">清除路线</button>
+    </div>
+
+    <h3>🔍 全球中文智能搜索</h3>
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="输入全球任意地名、店铺...">
+        <button onclick="searchLocation()">搜索定位</button>
+    </div>
+    <hr>
+
+    <h3>添加地点到数据库</h3>
+    <div class="form-group">
+        <label>名称：</label>
+        <input type="text" id="name" placeholder="例如：东京塔 / 某拉面店">
+    </div>
+    <div class="form-group">
+        <label>类型：</label>
+        <select id="category">
+            <option value="1">景点</option>
+            <option value="2">餐厅</option>
+        </select>
+    </div>
+    <div style="margin-bottom: 10px;">
+        <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 3px;">城市：</label>
+        <input type="text" id="cityInput" placeholder="例如：北京、上海、武汉、南京" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    <div class="form-group">
+        <label>纬度 (Latitude)：</label>
+        <input type="text" id="latitude" placeholder="点击地图或搜索自动填入">
+    </div>
+    <div class="form-group">
+        <label>经度 (Longitude)：</label>
+        <input type="text" id="longitude" placeholder="点击地图或搜索自动填入">
+    </div>
+    <div class="form-group">
+        <label>地址/说明：</label>
+        <input type="text" id="address" placeholder="机位或特色说明">
+    </div>
+    <div class="form-group">
+        <label>📝 游玩笔记 / 心得：</label>
+        <textarea id="description" rows="3" placeholder="记录下这里的特色、拍照机位、美食推荐..."></textarea>
+    </div>
+    <div class="form-group">
+        <label>📸 上传实景照片：</label>
+        <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)" style="padding: 4px;">
+        <!-- 图片预览框 -->
+        <div id="imagePreviewContainer" style="margin-top: 5px; display: none;">
+            <img id="previewImg" src="" style="max-width: 100%; max-height: 120px; border-radius: 4px; border: 1px solid #ddd;">
+        </div>
+        <!-- 隐藏的输入框，用于存放上传成功后的图片 URL -->
+        <input type="hidden" id="imageUrl">
+    </div>
+    <button onclick="addLocation()" style="width: 100%; background: #28a745;">保存到数据库</button>
+
+    <hr style="margin: 20px 0;">
+    <h3>📋 已保存的地点 (按城市分类)</h3>
+    <!-- 动态按城市分类渲染的容器 -->
+    <div id="savedLocationsContainer">
+        <p style="color: #909399; font-size: 13px;">正在加载地点...</p>
+    </div>
+</div>
+
+<!-- 右侧：地图 -->
+<div id="map"></div>
+
+<script>
+    // ⚠️ 请去高德开放平台免费申请一个 Web端(JS API) 的 Key 填在这里
+    const AMAP_KEY = '2921914fc3b15f8c45acd4ed8d9ae041';
+
+    const map = new AMap.Map('map', {
+        zoom: 12,
+        center: [116.4074, 39.9042], // 东京经纬度 [lng, lat]
+        viewMode: '3D'
+    });
+
+    let currentMarker = null;
+    let dbMarkers = [];
+    const API_BASE = 'https://travel-dujt.onrender.com/api/locations';
+
+    // 🆕 记录起点和终点的全局变量
+    let selectStartPoint = null;
+    let selectEndPoint = null;
+
+    // 1. 点击地图任意位置选点
+    map.on('click', (e) => {
+        const lng = e.lnglat.getLng();
+        const lat = e.lnglat.getLat();
+        setPoint(lat, lng, "选中位置");
+    });
+
+    function setPoint(lat, lng, title) {
+        document.getElementById('latitude').value = lat.toFixed(6);
+        document.getElementById('longitude').value = lng.toFixed(6);
+
+        if (currentMarker) {
+            currentMarker.remove();
+        }
+        currentMarker = new AMap.Marker({
+            position: [lng, lat],
+            title: title
+        });
+        map.add(currentMarker);
+        map.setCenter([lng, lat]);
+        map.setZoom(16);
+    }
+
+    // 2. 全球中文地名与商铺搜索
+    function searchLocation() {
+        const keyword = document.getElementById('search-input').value;
+        if (!keyword) return alert('请输入搜索关键词！');
+
+        AMap.plugin('AMap.PlaceSearch', function() {
+            const placeSearch = new AMap.PlaceSearch({
+                pageSize: 1,
+                pageIndex: 1,
+                city: "全国" // 或留空支持全球
+            });
+
+            placeSearch.search(keyword, function(status, result) {
+                if (status === 'complete' && result.info === 'OK') {
+                    const poi = result.poiList.pois[0];
+                    const lng = poi.location.lng;
+                    const lat = poi.location.lat;
+                    const address = poi.address || poi.name;
+
+                    document.getElementById('name').value = poi.name;
+                    document.getElementById('address').value = address;
+                    setPoint(lat, lng, poi.name);
+                } else {
+                    alert('未找到相关地点，请尝试更准确的名称！');
+                }
+            });
+        });
+    }
+
+    function addLocation() {
+        const cityValue = document.getElementById('cityInput').value.trim();
+        const name = document.getElementById('name').value;
+        const latitude = document.getElementById('latitude').value;
+        const longitude = document.getElementById('longitude').value;
+        const imageUrl = document.getElementById('imageUrl').value;
+
+        if (!name || !latitude || !longitude) {
+            alert('请先填写名称并定位/点击地图！');
+            return;
+        }
+
+        const data = {
+            name: name,
+            category: parseInt(document.getElementById('category').value),
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+            address: document.getElementById('address').value,
+            description: document.getElementById('description').value,
+            imageUrl: imageUrl,
+            city: cityValue || '其他城市' // 🏙️ 城市名称
+        };
+
+        // 发送请求
+        fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => res.text())
+            .then(result => {
+                alert(result);
+                loadLocations();
+
+                document.getElementById('imageFile').value = '';
+                document.getElementById('imagePreviewContainer').style.display = 'none';
+                document.getElementById('imageUrl').value = '';
+            })
+            .catch(err => console.error('保存失败:', err));
+    }
+
+    function renderGroupedLocations(data) {
+        const container = document.getElementById('savedLocationsContainer'); // 确保你的左侧容器ID是这个
+        if (!container) return;
+        container.innerHTML = '';
+
+        // 1. 按城市分组
+        const groups = {};
+        data.forEach(item => {
+            let cityName = item.city ? item.city.trim() : '其他城市';
+            if (!groups[cityName]) {
+                groups[cityName] = [];
+            }
+            groups[cityName].push(item);
+        });
+
+        // 2. 遍历每个城市，生成类似图中的区块
+        for (let cityName in groups) {
+            const citySection = document.createElement('div');
+            citySection.style.marginBottom = '15px';
+            citySection.style.background = '#fff';
+            citySection.style.padding = '10px';
+            citySection.style.borderRadius = '6px';
+            citySection.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+
+            // 城市标题
+            const count = groups[cityName].length;
+            citySection.innerHTML = `
+            <div style="font-weight: bold; font-size: 15px; margin-bottom: 8px; color: #333; border-bottom: 2px solid #eee; padding-bottom: 4px;">
+                📍 ${cityName} <span style="font-size: 12px; color: #888; font-weight: normal;">(共 ${count} 个作品/地点)</span>
+            </div>
+            <div class="city-items-list"></div>
+        `;
+
+            const itemListContainer = citySection.querySelector('.city-items-list');
+
+            // 3. 渲染该城市下的具体地点（所有事件都绑定在这里面）
+            groups[cityName].forEach(item => {
+                const card = document.createElement('div');
+                card.style.padding = '8px 6px';
+                card.style.borderBottom = '1px dashed #f0f0f0';
+                card.style.cursor = 'pointer'; // 鼠标变成小手
+                card.style.borderRadius = '4px';
+                card.style.transition = 'background 0.2s';
+
+                // 鼠标悬停变色
+                card.onmouseenter = () => card.style.background = '#f1f3f5';
+                card.onmouseleave = () => card.style.background = 'transparent';
+
+                // 点击卡片：地图定位到该点
+                card.onclick = (e) => {
+                    if (e.target.tagName === 'BUTTON') return; // 点删除按钮时不触发
+                    setPoint(item.latitude, item.longitude, item.name);
+                };
+
+                const descHtml = item.description
+                    ? `<div style="font-size: 11px; color: #444; margin-top: 3px; background: #fdf6ec; padding: 4px 6px; border-radius: 3px; border-left: 2px solid #e6a23c;">📝 ${item.description}</div>`
+                    : '';
+
+                card.innerHTML = `
+                <div style="font-size: 13px; font-weight: bold;">${item.name}
+                    <span style="font-size: 10px; padding: 1px 4px; background: ${item.category == 1 ? '#e3f2fd' : '#fff3e0'}; color: ${item.category == 1 ? '#1565c0' : '#ef6c00'}; border-radius: 3px;">
+                        ${item.category == 1 ? '景点' : '餐厅'}
+                    </span>
+                </div>
+                <div style="font-size: 11px; color: #666; margin: 2px 0;">${item.address || '暂无地址'}</div>
+                ${descHtml}
+                <button onclick="deleteLocation(${item.id})" style="background:#dc3545; color:white; border:none; padding:1px 6px; border-radius:3px; font-size:10px; cursor:pointer; margin-top:4px;">删除</button>
+            `;
+                itemListContainer.appendChild(card);
+            });
+
+            container.appendChild(citySection);
+        }
+    }
+
+    // 3. 加载数据库中的地点并在地图和左侧列表中展示
+    function loadLocations() {
+        fetch(API_BASE)
+            .then(res => res.json())
+            .then(data => {
+                // 1. 移除地图上原有的旧标记
+                if (dbMarkers && dbMarkers.length > 0) {
+                    map.remove(dbMarkers);
+                }
+                dbMarkers = [];
+
+                // 2. 遍历数据，在地图上生成标注和弹窗
+                data.forEach(item => {
+                    const marker = new AMap.Marker({
+                        position: [item.longitude, item.latitude],
+                        title: item.name,
+                        offset: new AMap.Pixel(-12, -33)
+                    });
+
+                    // 🌟 组装游玩笔记和图片 HTML
+                    const descHtml = item.description
+                        ? `<p style="margin: 5px 0; color: #333; font-size: 12px; background: #fdf6ec; padding: 5px; border-radius: 3px; border-left: 2px solid #e6a23c;">📝 ${item.description}</p>`
+                        : '';
+
+                    const imgHtml = item.imageUrl
+                        ? `<img src="${item.imageUrl}" style="width: 100%; max-height: 100px; object-fit: cover; border-radius: 4px; margin-top: 5px;" />`
+                        : '';
+
+                    const infoContent = `
+                    <div style="padding:8px; max-width: 220px;">
+                        <b style="font-size:14px;">${item.name}</b><br>
+                        <span style="color:#666;font-size:12px;">${item.category == 1 ? '🌴 景点' : '🍜 餐厅'}</span><br>
+                        <p style="margin:3px 0 0 0;font-size:12px; color:#555;">${item.address || '暂无说明'}</p>
+                        ${descHtml}
+                        ${imgHtml}
+                        <div style="margin-top:8px;">
+                            <button onclick="setAsStart('${item.name}', ${item.longitude}, ${item.latitude})" style="background:#28a745;color:white;border:none;padding:2px 6px;border-radius:3px;font-size:11px;cursor:pointer;">设为起点</button>
+                            <button onclick="setAsEnd('${item.name}', ${item.longitude}, ${item.latitude})" style="background:#ffc107;color:black;border:none;padding:2px 6px;border-radius:3px;font-size:11px;cursor:pointer;">设为终点</button>
+                            <button onclick="deleteLocation(${item.id})" style="background:#dc3545;color:white;border:none;padding:2px 6px;border-radius:3px;font-size:11px;cursor:pointer;margin-left:4px;">删除</button>
+                        </div>
+                    </div>
+                `;
+
+                    const infoWindow = new AMap.InfoWindow({
+                        content: infoContent,
+                        offset: new AMap.Pixel(0, -30)
+                    });
+
+                    marker.on('click', () => {
+                        infoWindow.open(map, marker.getPosition());
+                    });
+
+                    dbMarkers.push(marker);
+                });
+
+                if (dbMarkers.length > 0) {
+                    map.add(dbMarkers);
+                }
+
+                // 3. 调用按城市分类渲染左侧列表的函数
+                renderGroupedLocations(data);
+            })
+            .catch(err => {
+                console.error('加载地点失败:', err);
+            });
+    }
+
+    // 4. 全国通用的路线规划与测距核心逻辑（支持全国任意城市、任意两点间导航）
+    function setAsStart(name, lng, lat) {
+        selectStartPoint = { name: name, lnglat: new AMap.LngLat(lng, lat) };
+        checkAndCalculateRoute();
+    }
+
+    function setAsEnd(name, lng, lat) {
+        selectEndPoint = { name: name, lnglat: new AMap.LngLat(lng, lat) };
+        checkAndCalculateRoute();
+    }
+
+    function checkAndCalculateRoute() {
+        const panel = document.getElementById('route-panel');
+        const resultText = document.getElementById('route-result-text');
+        const transferContainer = document.getElementById('transfer-container');
+
+        panel.style.display = 'block';
+
+        if (selectStartPoint && selectEndPoint) {
+            resultText.innerHTML = `从 <b>${selectStartPoint.name}</b> ➡️ <b>${selectEndPoint.name}</b>`;
+
+            // 1. 计算直线距离
+            const distance = selectStartPoint.lnglat.distance(selectEndPoint.lnglat);
+            const distanceKm = (distance / 1000).toFixed(2);
+
+            let htmlInfo = `📍 直线距离：<b>${distanceKm} 公里</b><br><hr style="margin:5px 0; border:0; border-top:1px solid #ccc;"><b>🚗 全国智能导航方案：</b><br>`;
+            transferContainer.innerHTML = htmlInfo + `正在计算全国路线...`;
+
+            // 2. 使用高德 Driving 驾车/出行路线规划插件（支持全国所有城市、无 AMap.Transfer 的严格城市限制）
+            AMap.plugin('AMap.Driving', function() {
+                const driving = new AMap.Driving({
+                    policy: AMap.DrivingPolicy.LEAST_TIME
+                });
+
+                driving.search(selectStartPoint.lnglat, selectEndPoint.lnglat, function(status, result) {
+                    if (status === 'complete' && result.routes && result.routes.length > 0) {
+                        const route = result.routes[0];
+                        const timeMinutes = Math.ceil(route.time / 60);
+                        const roadDistanceKm = (route.distance / 1000).toFixed(2);
+
+                        htmlInfo += `🚗 驾车导航距离：<b>${roadDistanceKm} 公里</b><br>`;
+                        htmlInfo += `⏱️ 预计行车耗时：<b>${timeMinutes} 分钟</b><br>`;
+
+                        if (route.steps && route.steps.length > 0) {
+                            htmlInfo += `<div style="margin-top:5px; font-size:12px; color:#555; max-height:100px; overflow-y:auto;"><b>主要路段：</b><br>`;
+                            route.steps.slice(0, 3).forEach((step, idx) => {
+                                htmlInfo += `&nbsp;${idx + 1}. ${step.instruction}<br>`;
+                            });
+                            htmlInfo += `</div>`;
+                        }
+                        transferContainer.innerHTML = htmlInfo;
+                    } else {
+                        transferContainer.innerHTML = htmlInfo + `<span style="color:#d9534f;">两点距离较近，建议直接查看上方直线距离或进行步行。</span>`;
+                    }
+                });
+            });
+
+        } else {
+            let tip = '已选择：';
+            if (selectStartPoint) tip += `起点【<b>${selectStartPoint.name}</b>】 `;
+            if (selectEndPoint) tip += `终点【<b>${selectEndPoint.name}</b>】`;
+            tip += '<br><span style="color:#666; font-size:11px;">请点击地图上另一个点的“设为起点/终点”</span>';
+            resultText.innerHTML = tip;
+            transferContainer.innerHTML = '';
+        }
+    }
+    // 清除路线状态
+    function clearRoute() {
+        selectStartPoint = null;
+        selectEndPoint = null;
+        document.getElementById('route-panel').style.display = 'none';
+    }
+
+    // 6. 删除
+    function deleteLocation(id) {
+        if (confirm('确定删除吗？')) {
+            fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
+                .then(res => res.text())
+                .then(msg => {
+                    alert(msg);
+                    loadLocations();
+                });
+        }
+    }
+
+    // 选择图片后本地即时预览并自动上传到后端
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 1. 本地预览
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImg').src = e.target.result;
+            document.getElementById('imagePreviewContainer').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+
+        // 2. 自动异步上传到后端获取 URL
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 可以直接利用你前面定义好的 API_BASE（把后面的 /locations 替换成 /upload）
+        const uploadUrl = API_BASE.replace('/locations', '/upload');
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(res => res.text())
+            .then(url => {
+                if (url.startsWith('http')) {
+                    document.getElementById('imageUrl').value = url; // 赋值给隐藏域
+                    console.log("图片上传成功，访问链接：", url);
+                } else {
+                    alert('图片上传失败：' + url);
+                }
+            })
+            .catch(err => console.error('上传请求失败:', err));
+    }
+
+    loadLocations();
+</script>
+</body>
+</html>
