@@ -15,16 +15,10 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class UploadController {
 
-    @Value("${supabase.url:https://ryybxlewunlxavehxjcp.supabase.co}")
-    private String supabaseUrl;
-
-    // 直接把你的 sb_secret_ 密钥作为默认值写在这里！
-    // 这样本地和 Render 都能直接用，再也不怕环境变量漏配了
-    @Value("${supabase.service-role-key:sb_secret_G80uDierjuKoAKONY5C35w_60dpczP}")
-    private String serviceRoleKey;
-
-    @Value("${supabase.bucket-name:zyhan0911-createsOrg}")
-    private String bucketName;
+    // 直接写死，再也不用管什么环境变量或配置文件了！
+    private final String supabaseUrl = "https://ryybxlewunlxavehxjcp.supabase.co";
+    private final String serviceRoleKey = "sb_secret_G80uDierjuKoAKONY5C35w_60dpczP";
+    private final String bucketName = "zyhan0911-createsOrg";
 
     @PostMapping("/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
