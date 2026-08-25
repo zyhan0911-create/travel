@@ -40,8 +40,9 @@ public class UploadController {
             // 官方上传接口: POST /storage/v1/object/{bucketName}/{fileName}
             String uploadApiUrl = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + newFilename;
 
-            // 3. 准备请求头
+            // 3. 准备请求头（适配 Supabase 新版 sb_secret_ 密钥）
             HttpHeaders headers = new HttpHeaders();
+            headers.set("apikey", serviceRoleKey);                     // <-- 加上这一行
             headers.set("Authorization", "Bearer " + serviceRoleKey);
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
