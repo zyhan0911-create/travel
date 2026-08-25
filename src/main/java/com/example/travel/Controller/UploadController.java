@@ -17,7 +17,7 @@ public class UploadController {
 
     // 直接写死，再也不用管什么环境变量或配置文件了！
     private final String supabaseUrl = "https://ryybxlewunlxavehxjcp.supabase.co";
-    private final String serviceRoleKey = "sb_secret_G80uDierjuKoAKONY5C35w_60dpczP";
+    private final String serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eWJ4bGV3dW5seGF2ZWh4amNwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzU1MzEyMiwiZXhwIjoyMTAzMTI5MTIyfQ.VaE4olYVWHcyi02U5GqQs4iiKhYwTjob-KS4EMdSE2M";
     private final String bucketName = "zyhan0911-createsOrg";
 
     @PostMapping("/upload")
