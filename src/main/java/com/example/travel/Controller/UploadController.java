@@ -15,7 +15,6 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class UploadController {
 
-    // 直接写死，再也不用管什么环境变量或配置文件了！
     private final String supabaseUrl = "https://ryybxlewunlxavehxjcp.supabase.co";
     private final String serviceRoleKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eWJ4bGV3dW5seGF2ZWh4amNwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzU1MzEyMiwiZXhwIjoyMTAzMTI5MTIyfQ.VaE4olYVWHcyi02U5GqQs4iiKhYwTjob-KS4EMdSE2M";
     private final String bucketName = "zyhan0911-createsOrg";
@@ -27,24 +26,18 @@ public class UploadController {
         }
 
         try {
-            // 1. 生成不重复的文件名
             String originalFilename = file.getOriginalFilename();
             String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
             String newFilename = UUID.randomUUID().toString() + extension;
 
-            // 2. 拼接 Supabase Storage 上传 API 地址
-            // 官方上传接口: POST /storage/v1/object/{bucketName}/{fileName}
             String uploadApiUrl = supabaseUrl + "/storage/v1/object/" + bucketName + "/" + newFilename;
 
-            // 3. 准备请求头（适配 Supabase 新版 sb_secret_ 密钥）
             HttpHeaders headers = new HttpHeaders();
-            headers.set("apikey", serviceRoleKey);                     // <-- 加上这一行
+            headers.set("apikey", serviceRoleKey);
             headers.set("Authorization", "Bearer " + serviceRoleKey);
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            // 4. 封装文件流
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            // 注意：Spring 的 RestTemplate 需要把 MultipartFile 转成 ByteArrayResource 才能正确通过 HTTP 发送
             body.add("file", new org.springframework.core.io.ByteArrayResource(file.getBytes()) {
                 @Override
                 public String getFilename() {
@@ -54,13 +47,10 @@ public class UploadController {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-            // 5. 发送请求到 Supabase
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<String> response = restTemplate.postForEntity(uploadApiUrl, requestEntity, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
-                // 6. 上传成功后，拼接 Supabase 的公开访问 URL
-                // 公开访问格式: {supabaseUrl}/storage/v1/object/public/{bucketName}/{fileName}
                 String publicUrl = supabaseUrl + "/storage/v1/object/public/" + bucketName + "/" + newFilename;
                 return ResponseEntity.ok(publicUrl);
             } else {

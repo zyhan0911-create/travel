@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>全球城市旅游地图</title>
-    <!-- 引入高德地图 JS API v2.0 -->
     <script type="text/javascript">
         window._AMapSecurityConfig = {
             securityJsCode: '5d29698351e54fb8a4b1cda25d7fad18',
@@ -13,24 +12,20 @@
     <script src="https://webapi.amap.com/maps?v=2.0&key=2921914fc3b15f8c45acd4ed8d9ae041&plugin=AMap.PlaceSearch"></script>
 
     <style>
-        /* 引入优雅的艺术风衬线字体与细腻质感 */
         body {
             margin: 0;
             padding: 0;
             display: flex;
             height: 100vh;
             font-family: "PingFang SC", "Microsoft YaHei", "Georgia", serif;
-            /* 模拟高级青绿大理石的底色和微光 */
             background: linear-gradient(135deg, #e0ece4 0%, #c4dbd0 50%, #a3c9b8 100%);
             color: #2b3a32;
         }
 
-        /* 左侧面板：带有高级大理石/翡翠半透明质感的侧边栏 */
         #sidebar {
             width: 410px;
             padding: 26px;
             box-sizing: border-box;
-            /* 半透明雾面青绿质感 */
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(12px);
             overflow-y: auto;
@@ -44,7 +39,6 @@
             height: 100%;
         }
 
-        /* 艺术感标题 */
         h2 {
             font-size: 21px;
             font-weight: 500;
@@ -63,7 +57,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* 表单控件：克制而优雅的流线设计 */
         .form-group { margin-bottom: 14px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 12px; color: #4f6f5c; }
         .form-group input, .form-group select, .form-group textarea {
@@ -71,7 +64,7 @@
             padding: 10px 14px;
             box-sizing: border-box;
             border: 1px solid #b8d0c2;
-            border-radius: 20px; /* 圆润的微胶囊造型，呼应圆圈艺术感 */
+            border-radius: 20px;
             font-size: 13px;
             transition: all 0.3s ease;
             background: rgba(255, 255, 255, 0.7);
@@ -84,7 +77,6 @@
             box-shadow: 0 0 0 3px rgba(82, 139, 112, 0.15);
         }
 
-        /* 按钮：翡翠深绿色调，温润的圆角胶囊 */
         button {
             background: linear-gradient(135deg, #528b70 0%, #3e6b54 100%);
             color: white;
@@ -104,11 +96,9 @@
             box-shadow: 0 6px 16px rgba(62, 107, 84, 0.3);
         }
 
-        /* 搜索栏组合 */
         .search-box { display: flex; gap: 8px; margin-bottom: 15px; }
         .search-box input { flex-grow: 1; margin: 0; }
 
-        /* 路线规划面板：通透的水绿色雾化感 */
         #route-panel {
             background: rgba(212, 233, 221, 0.6);
             backdrop-filter: blur(8px);
@@ -119,12 +109,10 @@
             border: 1px solid rgba(163, 201, 184, 0.6);
         }
 
-        /* 滚动条瘦身美化 */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #b8d0c2; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #95b8a4; }
 
-        /* 默认或大屏：左右分栏 */
         body {
             margin: 0; padding: 0; display: flex; height: 100vh;
             font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -132,19 +120,18 @@
         #sidebar { width: 410px; height: 100%; overflow-y: auto; z-index: 10; }
         #map { flex-grow: 1; height: 100%; }
 
-        /* 📱 手机等小屏幕设备自适应：上下堆叠 */
         @media screen and (max-width: 768px) {
             body {
-                flex-direction: column; /* 改为上下排列 */
+                flex-direction: column;
             }
             #sidebar {
                 width: 100%;
-                height: 45vh; /* 手机上侧边栏占上半部分 */
-                order: 2;   /* 放在地图下面，或者设为 1 放在上面 */
+                height: 45vh;
+                order: 2;
             }
             #map {
                 width: 100%;
-                height: 55vh; /* 地图占下半部分 */
+                height: 55vh;
                 order: 1;
             }
         }
@@ -152,11 +139,9 @@
 </head>
 <body>
 
-<!-- 左侧：表单与搜索 -->
 <div id="sidebar">
     <h2>🗺️ 全球旅游地图</h2>
 
-    <!-- 🆕 路线规划与测距结果面板 -->
     <div id="route-panel" style="background: #e2f0cb; padding: 10px; margin-bottom: 15px; border-radius: 5px; font-size: 13px; display: none; border: 1px solid #b5d56d;">
         <b>🧭 路线规划与测距：</b>
         <div id="route-result-text" style="margin-top: 5px; color: #333;"></div>
@@ -206,33 +191,28 @@
     <div class="form-group">
         <label>📸 上传实景照片：</label>
         <input type="file" id="imageFile" accept="image/*" onchange="previewImage(event)" style="padding: 4px;">
-        <!-- 图片预览框 -->
         <div id="imagePreviewContainer" style="margin-top: 5px; display: none;">
             <img id="previewImg" src="" style="max-width: 100%; max-height: 120px; border-radius: 4px; border: 1px solid #ddd;">
         </div>
-        <!-- 隐藏的输入框，用于存放上传成功后的图片 URL -->
         <input type="hidden" id="imageUrl">
     </div>
     <button onclick="addLocation()" style="width: 100%; background: #28a745;">保存到数据库</button>
 
     <hr style="margin: 20px 0;">
     <h3>📋 已保存的地点 (按城市分类)</h3>
-    <!-- 动态按城市分类渲染的容器 -->
     <div id="savedLocationsContainer">
         <p style="color: #909399; font-size: 13px;">正在加载地点...</p>
     </div>
 </div>
 
-<!-- 右侧：地图 -->
 <div id="map"></div>
 
 <script>
-    // ⚠️ 请去高德开放平台免费申请一个 Web端(JS API) 的 Key 填在这里
     const AMAP_KEY = '2921914fc3b15f8c45acd4ed8d9ae041';
 
     const map = new AMap.Map('map', {
         zoom: 12,
-        center: [116.4074, 39.9042], // 东京经纬度 [lng, lat]
+        center: [116.4074, 39.9042],
         viewMode: '3D'
     });
 
@@ -240,11 +220,9 @@
     let dbMarkers = [];
     const API_BASE = 'https://travel-dujt.onrender.com/api/locations';
 
-    // 🆕 记录起点和终点的全局变量
     let selectStartPoint = null;
     let selectEndPoint = null;
 
-    // 1. 点击地图任意位置选点
     map.on('click', (e) => {
         const lng = e.lnglat.getLng();
         const lat = e.lnglat.getLat();
@@ -267,7 +245,6 @@
         map.setZoom(16);
     }
 
-    // 2. 全球中文地名与商铺搜索
     function searchLocation() {
         const keyword = document.getElementById('search-input').value;
         if (!keyword) return alert('请输入搜索关键词！');
@@ -276,7 +253,7 @@
             const placeSearch = new AMap.PlaceSearch({
                 pageSize: 1,
                 pageIndex: 1,
-                city: "全国" // 或留空支持全球
+                city: "全国"
             });
 
             placeSearch.search(keyword, function(status, result) {
@@ -315,10 +292,9 @@
             address: document.getElementById('address').value,
             description: document.getElementById('description').value,
             imageUrl: imageUrl,
-            city: cityValue || '其他城市' // 🏙️ 城市名称
+            city: cityValue || '其他城市'
         };
 
-        // 发送请求
         fetch(API_BASE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -337,11 +313,10 @@
     }
 
     function renderGroupedLocations(data) {
-        const container = document.getElementById('savedLocationsContainer'); // 确保你的左侧容器ID是这个
+        const container = document.getElementById('savedLocationsContainer');
         if (!container) return;
         container.innerHTML = '';
 
-        // 1. 按城市分组
         const groups = {};
         data.forEach(item => {
             let cityName = item.city ? item.city.trim() : '其他城市';
@@ -351,7 +326,6 @@
             groups[cityName].push(item);
         });
 
-        // 2. 遍历每个城市，生成类似图中的区块
         for (let cityName in groups) {
             const citySection = document.createElement('div');
             citySection.style.marginBottom = '15px';
@@ -360,7 +334,6 @@
             citySection.style.borderRadius = '6px';
             citySection.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
 
-            // 城市标题
             const count = groups[cityName].length;
             citySection.innerHTML = `
             <div style="font-weight: bold; font-size: 15px; margin-bottom: 8px; color: #333; border-bottom: 2px solid #eee; padding-bottom: 4px;">
@@ -371,22 +344,19 @@
 
             const itemListContainer = citySection.querySelector('.city-items-list');
 
-            // 3. 渲染该城市下的具体地点（所有事件都绑定在这里面）
             groups[cityName].forEach(item => {
                 const card = document.createElement('div');
                 card.style.padding = '8px 6px';
                 card.style.borderBottom = '1px dashed #f0f0f0';
-                card.style.cursor = 'pointer'; // 鼠标变成小手
+                card.style.cursor = 'pointer';
                 card.style.borderRadius = '4px';
                 card.style.transition = 'background 0.2s';
 
-                // 鼠标悬停变色
                 card.onmouseenter = () => card.style.background = '#f1f3f5';
                 card.onmouseleave = () => card.style.background = 'transparent';
 
-                // 点击卡片：地图定位到该点
                 card.onclick = (e) => {
-                    if (e.target.tagName === 'BUTTON') return; // 点删除按钮时不触发
+                    if (e.target.tagName === 'BUTTON') return;
                     setPoint(item.latitude, item.longitude, item.name);
                 };
 
@@ -411,18 +381,15 @@
         }
     }
 
-    // 3. 加载数据库中的地点并在地图和左侧列表中展示
     function loadLocations() {
         fetch(API_BASE)
             .then(res => res.json())
             .then(data => {
-                // 1. 移除地图上原有的旧标记
                 if (dbMarkers && dbMarkers.length > 0) {
                     map.remove(dbMarkers);
                 }
                 dbMarkers = [];
 
-                // 2. 遍历数据，在地图上生成标注和弹窗
                 data.forEach(item => {
                     const marker = new AMap.Marker({
                         position: [item.longitude, item.latitude],
@@ -430,7 +397,6 @@
                         offset: new AMap.Pixel(-12, -33)
                     });
 
-                    // 🌟 组装游玩笔记和图片 HTML
                     const descHtml = item.description
                         ? `<p style="margin: 5px 0; color: #333; font-size: 12px; background: #fdf6ec; padding: 5px; border-radius: 3px; border-left: 2px solid #e6a23c;">📝 ${item.description}</p>`
                         : '';
@@ -470,7 +436,6 @@
                     map.add(dbMarkers);
                 }
 
-                // 3. 调用按城市分类渲染左侧列表的函数
                 renderGroupedLocations(data);
             })
             .catch(err => {
@@ -478,7 +443,6 @@
             });
     }
 
-    // 4. 全国通用的路线规划与测距核心逻辑（支持全国任意城市、任意两点间导航）
     function setAsStart(name, lng, lat) {
         selectStartPoint = { name: name, lnglat: new AMap.LngLat(lng, lat) };
         checkAndCalculateRoute();
@@ -506,7 +470,6 @@
             let htmlInfo = `📍 直线距离：<b>${distanceKm} 公里</b><br><hr style="margin:5px 0; border:0; border-top:1px solid #ccc;"><b>🚗 全国智能导航方案：</b><br>`;
             transferContainer.innerHTML = htmlInfo + `正在计算全国路线...`;
 
-            // 2. 使用高德 Driving 驾车/出行路线规划插件（支持全国所有城市、无 AMap.Transfer 的严格城市限制）
             AMap.plugin('AMap.Driving', function() {
                 const driving = new AMap.Driving({
                     policy: AMap.DrivingPolicy.LEAST_TIME
@@ -544,14 +507,12 @@
             transferContainer.innerHTML = '';
         }
     }
-    // 清除路线状态
     function clearRoute() {
         selectStartPoint = null;
         selectEndPoint = null;
         document.getElementById('route-panel').style.display = 'none';
     }
 
-    // 6. 删除
     function deleteLocation(id) {
         if (confirm('确定删除吗？')) {
             fetch(`${API_BASE}/${id}`, { method: 'DELETE' })
@@ -563,12 +524,10 @@
         }
     }
 
-    // 选择图片后本地即时预览并自动上传到后端
     function previewImage(event) {
         const file = event.target.files[0];
         if (!file) return;
 
-        // 1. 本地预览
         const reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('previewImg').src = e.target.result;
@@ -576,11 +535,9 @@
         };
         reader.readAsDataURL(file);
 
-        // 2. 自动异步上传到后端获取 URL
         const formData = new FormData();
         formData.append('file', file);
 
-        // 可以直接利用你前面定义好的 API_BASE（把后面的 /locations 替换成 /upload）
         const uploadUrl = API_BASE.replace('/locations', '/upload');
 
         fetch(uploadUrl, {
@@ -590,7 +547,7 @@
             .then(res => res.text())
             .then(url => {
                 if (url.startsWith('http')) {
-                    document.getElementById('imageUrl').value = url; // 赋值给隐藏域
+                    document.getElementById('imageUrl').value = url;
                     alert('图片上传成功！');
                 } else {
                     alert('图片上传失败：' + url);
