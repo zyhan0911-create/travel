@@ -302,7 +302,12 @@
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
         const imageUrl = document.getElementById('imageUrl').value;
+        const fileInput = document.getElementById('imageFile');
 
+        if (fileInput.files.length > 0 && !imageUrl) {
+            alert('图片正在上传到云端，请稍等 1-2 秒再点保存！');
+            return;
+        }
         if (!name || !latitude || !longitude) {
             alert('请先填写名称并定位/点击地图！');
             return;
