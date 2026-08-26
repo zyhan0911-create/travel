@@ -302,12 +302,6 @@
         const latitude = document.getElementById('latitude').value;
         const longitude = document.getElementById('longitude').value;
         const imageUrl = document.getElementById('imageUrl').value;
-        const fileInput = document.getElementById('imageFile');
-
-        if (fileInput.files.length > 0 && !imageUrl) {
-            alert('图片正在上传到云端，请稍等 1-2 秒再点保存！');
-            return;
-        }
         if (!name || !latitude || !longitude) {
             alert('请先填写名称并定位/点击地图！');
             return;
@@ -597,12 +591,15 @@
             .then(url => {
                 if (url.startsWith('http')) {
                     document.getElementById('imageUrl').value = url; // 赋值给隐藏域
-                    console.log("图片上传成功，访问链接：", url);
+                    alert('图片上传成功！');
                 } else {
                     alert('图片上传失败：' + url);
                 }
             })
-            .catch(err => console.error('上传请求失败:', err));
+            .catch(err => {
+                console.error('上传请求失败:', err);
+                alert('上传请求失败，请检查网络');
+            });
     }
 
     loadLocations();
